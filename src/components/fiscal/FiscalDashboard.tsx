@@ -5,6 +5,7 @@ import { CompanyDetail } from './CompanyDetail';
 import { FileUploader } from './FileUploader';
 import { CompaniesData } from '@/types/fiscal';
 import { FiscalParser } from '@/utils/fiscal-parser';
+import { CompactUploader } from './CompactUploader';
 import { useToast } from '@/hooks/use-toast';
 
 export const FiscalDashboard = () => {
@@ -115,11 +116,13 @@ export const FiscalDashboard = () => {
         )}
 
         {hasCompanies && (
-          <div className="p-4 border-t border-border bg-card">
-            <FileUploader 
-              onFilesSelected={handleFilesSelected}
-              isProcessing={isProcessing}
-            />
+          <div className="p-2 border-t border-border bg-card">
+            <div className="max-w-sm">
+              <CompactUploader
+                onFilesSelected={handleFilesSelected}
+                isProcessing={isProcessing}
+              />
+            </div>
           </div>
         )}
       </div>

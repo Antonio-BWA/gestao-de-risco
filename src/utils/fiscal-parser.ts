@@ -122,6 +122,25 @@ export class FiscalParser {
   }
 
   private static capitalizeFirstLetter(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    const normalized = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    
+    // Mapear variações comuns de meses
+    const monthMap: { [key: string]: string } = {
+      'jan': 'Janeiro', 'janeiro': 'Janeiro',
+      'fev': 'Fevereiro', 'fevereiro': 'Fevereiro',
+      'mar': 'Março', 'março': 'Março',
+      'abr': 'Abril', 'abril': 'Abril',
+      'mai': 'Maio', 'maio': 'Maio',
+      'jun': 'Junho', 'junho': 'Junho',
+      'jul': 'Julho', 'julho': 'Julho',
+      'ago': 'Agosto', 'agosto': 'Agosto',
+      'set': 'Setembro', 'setembro': 'Setembro',
+      'out': 'Outubro', 'outubro': 'Outubro',
+      'nov': 'Novembro', 'novembro': 'Novembro',
+      'dez': 'Dezembro', 'dezembro': 'Dezembro'
+    };
+    
+    const lowerStr = str.toLowerCase();
+    return monthMap[lowerStr] || normalized;
   }
 }

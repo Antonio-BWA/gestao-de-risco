@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, FileSpreadsheet } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { CompanyDetail } from './CompanyDetail';
 import { FileUploader } from './FileUploader';
@@ -7,12 +7,16 @@ import { CompaniesData } from '@/types/fiscal';
 import { FiscalParser } from '@/utils/fiscal-parser';
 import { CompactUploader } from './CompactUploader';
 import { useToast } from '@/hooks/use-toast';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
+import { ExcelExport } from '@/utils/excel-export';
+import { Button } from '@/components/ui/button';
 
 export const FiscalDashboard = () => {
   const [companiesData, setCompaniesData] = useState<CompaniesData>({});
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const { saveCompanyData } = useSupabaseData();
 
   const handleFilesSelected = async (files: File[]) => {
     setIsProcessing(true);
@@ -49,6 +53,9 @@ export const FiscalDashboard = () => {
 
       setCompaniesData(consolidatedData);
       
+      // Salvar dados no Supabase
+      await saveCompanyData(consolidatedData);
+      
       // Selecionar primeira empresa se nenhuma estiver selecionada
       if (!selectedCompany && Object.keys(consolidatedData).length > 0) {
         setSelectedCompany(Object.keys(consolidatedData)[0]);
@@ -73,6 +80,10 @@ export const FiscalDashboard = () => {
 
   const handleCompanySelect = (cnpj: string) => {
     setSelectedCompany(cnpj);
+  };
+
+  const handleExportConsolidated = async () => {
+    await ExcelExport.exportConsolidatedReport(companiesData);
   };
 
   const hasCompanies = Object.keys(companiesData).length > 0;
@@ -103,9 +114,13 @@ export const FiscalDashboard = () => {
               <h2 className="text-xl font-semibold text-foreground">
                 Selecione uma empresa
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mb-4">
                 Escolha uma empresa na barra lateral para visualizar os dados fiscais.
               </p>
+              <Button variant="outline" onClick={handleExportConsolidated}>
+                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                Exportar Relatório Consolidado
+              </Button>
             </div>
           </div>
         ) : (

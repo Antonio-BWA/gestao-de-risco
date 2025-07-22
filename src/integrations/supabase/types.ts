@@ -14,7 +14,112 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      companies: {
+        Row: {
+          cnpj: string
+          created_at: string
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          cnpj: string
+          created_at?: string
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          cnpj?: string
+          created_at?: string
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fiscal_data: {
+        Row: {
+          company_id: string
+          compras: number
+          created_at: string
+          faturamento: number
+          id: string
+          mes_ano: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          compras?: number
+          created_at?: string
+          faturamento?: number
+          id?: string
+          mes_ano: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          compras?: number
+          created_at?: string
+          faturamento?: number
+          id?: string
+          mes_ano?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_data_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partners: {
+        Row: {
+          ativo: boolean
+          cargo: string | null
+          company_id: string
+          cpf: string
+          created_at: string
+          id: string
+          nome: string
+          percentual_participacao: number
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cargo?: string | null
+          company_id: string
+          cpf: string
+          created_at?: string
+          id?: string
+          nome: string
+          percentual_participacao: number
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cargo?: string | null
+          company_id?: string
+          cpf?: string
+          created_at?: string
+          id?: string
+          nome?: string
+          percentual_participacao?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partners_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

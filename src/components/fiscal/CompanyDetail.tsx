@@ -1,8 +1,12 @@
-import { useEffect, useRef } from 'react';
-import { TrendingUp, TrendingDown, Building2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { TrendingUp, TrendingDown, Building2, Users, FileSpreadsheet } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { CompanyData } from '@/types/fiscal';
 import { FiscalCalculations } from '@/utils/fiscal-calculations';
+import { ExcelExport } from '@/utils/excel-export';
+import { PartnersManager } from './PartnersManager';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
 
 interface CompanyDetailProps {
   cnpj: string;
@@ -18,9 +22,42 @@ declare global {
 export const CompanyDetail = ({ cnpj, companyData }: CompanyDetailProps) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<any>(null);
+  const [showPartners, setShowPartners] = useState(false);
+  const [companyId, setCompanyId] = useState<string>('');
+  const [partners, setPartners] = useState<any[]>([]);
+  const { getCompanies, getCompanyPartners, saveCompanyData } = useSupabaseData();
 
   const totals = FiscalCalculations.calculateCompanyTotals(companyData);
   const monthlyData = FiscalCalculations.getMonthlyDataSorted(companyData);
+
+  useEffect(() => {
+    loadCompanyData();
+  }, [cnpj]);
+
+  const loadCompanyData = async () => {
+    const companies = await getCompanies();
+    const company = companies.find(c => c.cnpj === cnpj);
+    if (company) {
+      setCompanyId(company.id);
+      const partnersData = await getCompanyPartners(company.id);
+      setPartners(partnersData);
+    } else {
+      // Salvar empresa se não existir
+      const companiesDataToSave = { [cnpj]: companyData };
+      await saveCompanyData(companiesDataToSave);
+      // Tentar buscar novamente
+      const updatedCompanies = await getCompanies();
+      const newCompany = updatedCompanies.find(c => c.cnpj === cnpj);
+      if (newCompany) {
+        setCompanyId(newCompany.id);
+      }
+    }
+  };
+
+  const handleExportExcel = async () => {
+    const companiesDataForExport = { [cnpj]: companyData };
+    await ExcelExport.exportCompanyReport(companiesDataForExport, cnpj, partners);
+  };
 
   useEffect(() => {
     if (chartRef.current && window.Chart) {
@@ -101,15 +138,38 @@ export const CompanyDetail = ({ cnpj, companyData }: CompanyDetailProps) => {
     <div className="flex-1 overflow-auto bg-background">
       <div className="p-8 space-y-6 max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-corporate-blue rounded-lg flex items-center justify-center">
-            <Building2 className="w-6 h-6 text-white" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-corporate-blue rounded-lg flex items-center justify-center">
+              <Building2 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">{companyData.nome}</h1>
+              <p className="text-muted-foreground font-mono">{cnpj}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{companyData.nome}</h1>
-            <p className="text-muted-foreground font-mono">{cnpj}</p>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowPartners(!showPartners)}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              {showPartners ? 'Ocultar' : 'Gerenciar'} Sócios
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleExportExcel}
+            >
+              <FileSpreadsheet className="w-4 h-4 mr-2" />
+              Exportar Excel
+            </Button>
           </div>
         </div>
+
+        {/* Partners Manager */}
+        {showPartners && companyId && (
+          <PartnersManager companyId={companyId} companyName={companyData.nome} />
+        )}
 
         {/* Cards de Resumo */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

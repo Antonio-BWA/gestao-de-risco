@@ -101,6 +101,37 @@ export const useSupabaseData = () => {
     }
   }, []);
 
+  const linkUserToCompany = useCallback(async (companyId: string, userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('user_companies')
+        .insert({ user_id: userId, company_id: companyId });
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Erro ao vincular usuário à empresa:', error);
+      return false;
+    }
+  }, []);
+
+  const getUserCompanies = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_companies')
+        .select(`
+          companies (*)
+        `)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      return data?.map(item => item.companies) || [];
+    } catch (error) {
+      console.error('Erro ao buscar empresas do usuário:', error);
+      return [];
+    }
+  }, []);
+
   const getCompanyPartners = useCallback(async (companyId: string) => {
     try {
       const { data, error } = await supabase
@@ -194,6 +225,8 @@ export const useSupabaseData = () => {
     getCompanies,
     getCompanyPartners,
     savePartner,
-    deletePartner
+    deletePartner,
+    linkUserToCompany,
+    getUserCompanies
   };
 };

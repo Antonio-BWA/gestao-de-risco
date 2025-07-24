@@ -22,7 +22,7 @@ export const useSupabaseData = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const saveCompanyData = useCallback(async (companiesData: any) => {
+  const saveCompanyData = useCallback(async (companiesData: any, userId?: string) => {
     setLoading(true);
     try {
       for (const [cnpj, companyData] of Object.entries(companiesData)) {
@@ -55,6 +55,23 @@ export const useSupabaseData = () => {
 
           if (error) throw error;
           companyId = newCompany.id;
+        }
+
+        // Vincular usuário à empresa se userId for fornecido
+        if (userId) {
+          // Verificar se já existe vínculo
+          const { data: existingLink } = await supabase
+            .from('user_companies')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('company_id', companyId)
+            .single();
+
+          if (!existingLink) {
+            await supabase
+              .from('user_companies')
+              .insert({ user_id: userId, company_id: companyId });
+          }
         }
 
         // Salvar dados fiscais

@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Sidebar } from './Sidebar';
 import { CompanyDetail } from './CompanyDetail';
+import { CompanyList } from './CompanyList';
 import { FileUploader } from './FileUploader';
 import { CompactUploader } from './CompactUploader';
 import { GlobalRevenue } from './GlobalRevenue';
@@ -15,11 +16,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
 import { ExcelExport } from '@/utils/excel-export';
+import { supabase } from '@/integrations/supabase/client';
 
 export const FiscalDashboard = () => {
   const [companiesData, setCompaniesData] = useState<CompaniesData>({});
   const [companies, setCompanies] = useState<any[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<any>(null);
+  const [selectedTab, setSelectedTab] = useState('overview');
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
   const { saveCompanyData, getCompanies, getUserCompanies } = useSupabaseData();
@@ -78,16 +81,11 @@ export const FiscalDashboard = () => {
 
       setCompaniesData(consolidatedData);
       
-      // Salvar dados no Supabase
-      await saveCompanyData(consolidatedData);
+      // Salvar dados no Supabase vinculando ao usuário
+      await saveCompanyData(consolidatedData, user?.id);
       
       // Recarregar empresas após salvar
       await loadCompanies();
-      
-      // Selecionar primeira empresa se nenhuma estiver selecionada
-      if (!selectedCompany && Object.keys(consolidatedData).length > 0) {
-        setSelectedCompany(Object.keys(consolidatedData)[0]);
-      }
 
       toast({
         title: "Arquivos processados com sucesso",
@@ -110,12 +108,52 @@ export const FiscalDashboard = () => {
     setSelectedCompany(cnpj);
   };
 
+  const handleViewCompanyDetails = async (company: any) => {
+    // Carregar dados fiscais da empresa
+    await loadCompanyFiscalData(company);
+    setSelectedCompany(company);
+    setSelectedTab('details');
+  };
+
+  const loadCompanyFiscalData = async (company: any) => {
+    try {
+      const { data: fiscalData, error } = await supabase
+        .from('fiscal_data')
+        .select('*')
+        .eq('company_id', company.id);
+
+      if (error) throw error;
+
+      // Converter dados fiscais para o formato esperado
+      const companyFiscalData: any = {
+        nome: company.nome,
+        data: {}
+      };
+
+      fiscalData?.forEach((item: any) => {
+        companyFiscalData.data[item.mes_ano] = {
+          Compras: parseFloat(item.compras) || 0,
+          Faturamento: parseFloat(item.faturamento) || 0
+        };
+      });
+
+      // Atualizar dados consolidados
+      setCompaniesData(prev => ({
+        ...prev,
+        [company.cnpj]: companyFiscalData
+      }));
+
+    } catch (error) {
+      console.error('Erro ao carregar dados fiscais:', error);
+    }
+  };
+
   const handleExportConsolidated = async () => {
     await ExcelExport.exportConsolidatedReport(companiesData);
   };
 
   const hasCompanies = Object.keys(companiesData).length > 0;
-  const selectedCompanyData = selectedCompany ? companiesData[selectedCompany] : null;
+  const selectedCompanyData = selectedCompany?.cnpj ? companiesData[selectedCompany.cnpj] : null;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -148,7 +186,7 @@ export const FiscalDashboard = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="w-full">
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="details">Detalhes por Empresa</TabsTrigger>
@@ -156,61 +194,36 @@ export const FiscalDashboard = () => {
           <TabsTrigger value="external">Outros Faturamentos</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview">
-          <div className="h-screen flex bg-background">
-            <Sidebar 
-              companiesData={companiesData}
-              selectedCompany={selectedCompany}
-              onCompanySelect={handleCompanySelect}
-            />
-            
-            <div className="flex-1 flex flex-col">
-              {!hasCompanies ? (
-                <div className="flex-1 flex items-center justify-center p-8">
-                  <div className="max-w-md w-full">
-                    <FileUploader 
-                      onFilesSelected={handleFilesSelected}
-                      isProcessing={isProcessing}
-                    />
-                  </div>
-                </div>
-              ) : !selectedCompanyData ? (
-                <div className="flex-1 flex items-center justify-center p-8">
-                  <div className="text-center space-y-4">
-                    <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto" />
-                    <h2 className="text-xl font-semibold text-foreground">
-                      Selecione uma empresa
-                    </h2>
-                    <p className="text-muted-foreground mb-4">
-                      Escolha uma empresa na barra lateral para visualizar os dados fiscais.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <CompanyDetail 
-                  cnpj={selectedCompany!}
-                  companyData={selectedCompanyData}
+        <TabsContent value="overview" className="space-y-6">
+          {companies.length === 0 ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="max-w-md w-full">
+                <FileUploader 
+                  onFilesSelected={handleFilesSelected}
+                  isProcessing={isProcessing}
                 />
-              )}
-
-              {hasCompanies && (
-                <div className="p-2 border-t border-border bg-card">
-                  <div className="max-w-sm">
-                    <CompactUploader
-                      onFilesSelected={handleFilesSelected}
-                      isProcessing={isProcessing}
-                    />
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <>
+              <CompanyList
+                companies={companies}
+                onViewDetails={handleViewCompanyDetails}
+              />
+              <div className="max-w-sm">
+                <CompactUploader
+                  onFilesSelected={handleFilesSelected}
+                  isProcessing={isProcessing}
+                />
+              </div>
+            </>
+          )}
         </TabsContent>
 
         <TabsContent value="details">
           {selectedCompany ? (
             <CompanyDetail
-              cnpj={selectedCompany}
+              cnpj={selectedCompany.cnpj}
               companyData={selectedCompanyData!}
             />
           ) : (

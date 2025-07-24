@@ -31,7 +31,7 @@ export const useSupabaseData = () => {
           .from('companies')
           .select('id')
           .eq('cnpj', cnpj)
-          .single();
+          .maybeSingle();
 
         let companyId: string;
 
@@ -65,7 +65,7 @@ export const useSupabaseData = () => {
             .select('id')
             .eq('user_id', userId)
             .eq('company_id', companyId)
-            .single();
+            .maybeSingle();
 
           if (!existingLink) {
             await supabase

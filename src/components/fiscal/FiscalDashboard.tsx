@@ -37,20 +37,32 @@ export const FiscalDashboard = () => {
   const loadCompanies = async () => {
     if (!user) return;
     
-    let data;
-    if (isAdmin) {
-      data = await getCompanies();
-    } else {
-      data = await getUserCompanies(user.id);
+    try {
+      let data;
+      if (isAdmin) {
+        data = await getCompanies();
+      } else {
+        data = await getUserCompanies(user.id);
+      }
+      console.log('Empresas carregadas:', data);
+      setCompanies(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar empresas:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar empresas do banco de dados.",
+        variant: "destructive",
+      });
     }
-    setCompanies(data || []);
   };
 
   const handleFilesSelected = async (files: File[]) => {
     setIsProcessing(true);
     
     try {
+      console.log('Processando arquivos:', files.length);
       const newCompaniesData = await FiscalParser.parseFiles(files);
+      console.log('Dados extraídos:', newCompaniesData);
       
       if (Object.keys(newCompaniesData).length === 0) {
         toast({
@@ -79,12 +91,15 @@ export const FiscalDashboard = () => {
         }
       });
 
+      console.log('Dados consolidados:', consolidatedData);
       setCompaniesData(consolidatedData);
       
       // Salvar dados no Supabase vinculando ao usuário
-      await saveCompanyData(consolidatedData, user?.id);
+      console.log('Salvando no Supabase...');
+      await saveCompanyData(newCompaniesData, user?.id);
       
       // Recarregar empresas após salvar
+      console.log('Recarregando empresas...');
       await loadCompanies();
 
       toast({

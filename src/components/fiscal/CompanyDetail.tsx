@@ -35,22 +35,33 @@ export const CompanyDetail = ({ cnpj, companyData }: CompanyDetailProps) => {
   }, [cnpj]);
 
   const loadCompanyData = async () => {
-    const companies = await getCompanies();
-    const company = companies.find(c => c.cnpj === cnpj);
-    if (company) {
-      setCompanyId(company.id);
-      const partnersData = await getCompanyPartners(company.id);
-      setPartners(partnersData);
-    } else {
-      // Salvar empresa se não existir
-      const companiesDataToSave = { [cnpj]: companyData };
-      await saveCompanyData(companiesDataToSave);
-      // Tentar buscar novamente
-      const updatedCompanies = await getCompanies();
-      const newCompany = updatedCompanies.find(c => c.cnpj === cnpj);
-      if (newCompany) {
-        setCompanyId(newCompany.id);
+    try {
+      console.log('Carregando dados da empresa:', cnpj);
+      const companies = await getCompanies();
+      console.log('Empresas encontradas:', companies);
+      const company = companies.find(c => c.cnpj === cnpj);
+      console.log('Empresa encontrada:', company);
+      
+      if (company) {
+        setCompanyId(company.id);
+        const partnersData = await getCompanyPartners(company.id);
+        console.log('Sócios encontrados:', partnersData);
+        setPartners(partnersData);
+      } else {
+        console.log('Empresa não encontrada, criando...');
+        // Salvar empresa se não existir
+        const companiesDataToSave = { [cnpj]: companyData };
+        await saveCompanyData(companiesDataToSave);
+        // Tentar buscar novamente
+        const updatedCompanies = await getCompanies();
+        const newCompany = updatedCompanies.find(c => c.cnpj === cnpj);
+        if (newCompany) {
+          setCompanyId(newCompany.id);
+          console.log('Nova empresa criada com ID:', newCompany.id);
+        }
       }
+    } catch (error) {
+      console.error('Erro ao carregar dados da empresa:', error);
     }
   };
 

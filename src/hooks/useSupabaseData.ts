@@ -168,6 +168,9 @@ export const useSupabaseData = () => {
   const savePartner = useCallback(async (partner: Partner, companyId: string) => {
     setLoading(true);
     try {
+      console.log('Salvando sócio:', partner);
+      console.log('Company ID recebido:', companyId);
+      
       const partnerData = {
         company_id: companyId,
         nome: partner.nome,
@@ -177,17 +180,23 @@ export const useSupabaseData = () => {
         ativo: partner.ativo
       };
 
+      console.log('Dados do sócio para salvar:', partnerData);
+
       if (partner.id) {
+        console.log('Atualizando sócio existente');
         const { error } = await supabase
           .from('partners')
           .update(partnerData)
           .eq('id', partner.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        console.log('Inserindo novo sócio');
+        const { data, error } = await supabase
           .from('partners')
-          .insert(partnerData);
+          .insert(partnerData)
+          .select();
         if (error) throw error;
+        console.log('Sócio inserido:', data);
       }
 
       toast({
@@ -196,10 +205,10 @@ export const useSupabaseData = () => {
       });
       return true;
     } catch (error) {
-      console.error('Erro ao salvar sócio:', error);
+      console.error('Erro detalhado ao salvar sócio:', error);
       toast({
         title: "Erro",
-        description: "Erro ao salvar sócio.",
+        description: `Erro ao salvar sócio: ${error.message || error}`,
         variant: "destructive",
       });
       return false;

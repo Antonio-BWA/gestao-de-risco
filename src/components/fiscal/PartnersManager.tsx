@@ -39,6 +39,14 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({ companyId, com
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Tentando salvar sócio:', formData);
+    console.log('Company ID:', companyId);
+    
+    if (!companyId) {
+      console.error('Company ID não fornecido!');
+      return;
+    }
+    
     const success = await savePartner(formData, companyId);
     if (success) {
       setIsDialogOpen(false);

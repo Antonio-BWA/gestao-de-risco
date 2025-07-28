@@ -50,6 +50,13 @@ export const GlobalRevenue: React.FC = () => {
 
       if (partnersError) throw partnersError;
 
+      // Buscar faturamentos externos
+      const { data: externalRevenues, error: externalError } = await supabase
+        .from('external_revenues')
+        .select('cpf, valor, nome_empresa, mes_ano');
+
+      if (externalError) throw externalError;
+
       // Agrupar por CPF e calcular faturamento total
       const groupedData = partners?.reduce((acc: any, partner: any) => {
         const { cpf, nome, percentual_participacao, companies } = partner;
@@ -78,6 +85,28 @@ export const GlobalRevenue: React.FC = () => {
 
         return acc;
       }, {});
+
+      // Adicionar faturamentos externos ao agrupamento
+      externalRevenues?.forEach((external: any) => {
+        const cpf = external.cpf;
+        const valor = parseFloat(external.valor || 0);
+        
+        if (!groupedData[cpf]) {
+          groupedData[cpf] = {
+            cpf,
+            nome: `CPF ${formatCPF(cpf)}`, // Nome padrão se não encontrar sócio
+            totalRevenue: 0,
+            companies: []
+          };
+        }
+        
+        groupedData[cpf].totalRevenue += valor;
+        groupedData[cpf].companies.push({
+          nome: external.nome_empresa,
+          participacao: 0, // Faturamento externo não tem participação
+          faturamento: valor
+        });
+      });
 
       setData(Object.values(groupedData || {}));
     } catch (error) {
@@ -147,7 +176,9 @@ export const GlobalRevenue: React.FC = () => {
                   {item.companies.map((company, index) => (
                     <TableRow key={index}>
                       <TableCell>{company.nome}</TableCell>
-                      <TableCell>{company.participacao.toFixed(2)}%</TableCell>
+                      <TableCell>
+                        {company.participacao > 0 ? `${company.participacao.toFixed(2)}%` : 'Faturamento Externo'}
+                      </TableCell>
                       <TableCell>{formatCurrency(company.faturamento)}</TableCell>
                     </TableRow>
                   ))}

@@ -45,6 +45,7 @@ export type Database = {
           descricao: string | null
           id: string
           mes_ano: string
+          nome_empresa: string
           updated_at: string
           user_id: string
           valor: number
@@ -55,6 +56,7 @@ export type Database = {
           descricao?: string | null
           id?: string
           mes_ano: string
+          nome_empresa?: string
           updated_at?: string
           user_id: string
           valor?: number
@@ -65,6 +67,7 @@ export type Database = {
           descricao?: string | null
           id?: string
           mes_ano?: string
+          nome_empresa?: string
           updated_at?: string
           user_id?: string
           valor?: number

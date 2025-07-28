@@ -16,6 +16,7 @@ interface ExternalRevenue {
   mes_ano: string;
   valor: number;
   descricao?: string;
+  nome_empresa: string;
 }
 
 export const ExternalRevenues: React.FC = () => {
@@ -26,7 +27,8 @@ export const ExternalRevenues: React.FC = () => {
     cpf: '',
     mes_ano: '',
     valor: 0,
-    descricao: ''
+    descricao: '',
+    nome_empresa: ''
   });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -66,6 +68,7 @@ export const ExternalRevenues: React.FC = () => {
         mes_ano: formData.mes_ano,
         valor: formData.valor,
         descricao: formData.descricao,
+        nome_empresa: formData.nome_empresa,
         user_id: user.id
       };
 
@@ -139,7 +142,8 @@ export const ExternalRevenues: React.FC = () => {
       cpf: '',
       mes_ano: '',
       valor: 0,
-      descricao: ''
+      descricao: '',
+      nome_empresa: ''
     });
     setEditingRevenue(null);
   };
@@ -208,6 +212,16 @@ export const ExternalRevenues: React.FC = () => {
                 />
               </div>
               <div>
+                <Label htmlFor="nome_empresa">Nome da Empresa</Label>
+                <Input
+                  id="nome_empresa"
+                  type="text"
+                  value={formData.nome_empresa}
+                  onChange={(e) => setFormData({ ...formData, nome_empresa: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
                 <Label htmlFor="descricao">Descrição (opcional)</Label>
                 <Input
                   id="descricao"
@@ -238,6 +252,7 @@ export const ExternalRevenues: React.FC = () => {
             <TableRow>
               <TableHead>CPF</TableHead>
               <TableHead>Mês/Ano</TableHead>
+              <TableHead>Empresa</TableHead>
               <TableHead>Valor</TableHead>
               <TableHead>Descrição</TableHead>
               <TableHead>Ações</TableHead>
@@ -248,6 +263,7 @@ export const ExternalRevenues: React.FC = () => {
               <TableRow key={revenue.id}>
                 <TableCell>{formatCPF(revenue.cpf)}</TableCell>
                 <TableCell>{revenue.mes_ano}</TableCell>
+                <TableCell>{revenue.nome_empresa || '-'}</TableCell>
                 <TableCell>{formatCurrency(revenue.valor)}</TableCell>
                 <TableCell>{revenue.descricao || '-'}</TableCell>
                 <TableCell>
@@ -272,7 +288,7 @@ export const ExternalRevenues: React.FC = () => {
             ))}
             {revenues.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground">
+                <TableCell colSpan={6} className="text-center text-muted-foreground">
                   Nenhum faturamento externo cadastrado
                 </TableCell>
               </TableRow>

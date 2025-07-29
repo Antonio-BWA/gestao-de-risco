@@ -6,6 +6,7 @@ import { CompanyData } from '@/types/fiscal';
 import { FiscalCalculations } from '@/utils/fiscal-calculations';
 import { ExcelExport } from '@/utils/excel-export';
 import { PartnersManager } from './PartnersManager';
+import { EditFiscalDataModal } from './EditFiscalDataModal';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 
 interface CompanyDetailProps {
@@ -68,6 +69,11 @@ export const CompanyDetail = ({ cnpj, companyData }: CompanyDetailProps) => {
   const handleExportExcel = async () => {
     const companiesDataForExport = { [cnpj]: companyData };
     await ExcelExport.exportCompanyReport(companiesDataForExport, cnpj, partners);
+  };
+
+  const handleDataUpdated = () => {
+    // Recarregar dados da empresa após edição
+    loadCompanyData();
   };
 
   useEffect(() => {
@@ -160,6 +166,13 @@ export const CompanyDetail = ({ cnpj, companyData }: CompanyDetailProps) => {
             </div>
           </div>
           <div className="flex space-x-2">
+            {companyId && (
+              <EditFiscalDataModal
+                companyId={companyId}
+                companyName={companyData.nome}
+                onDataUpdated={handleDataUpdated}
+              />
+            )}
             <Button
               variant="outline"
               onClick={() => setShowPartners(!showPartners)}

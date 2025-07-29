@@ -5,11 +5,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
+import { ForgotPasswordForm } from './ForgotPasswordForm';
 
 export const AuthForm: React.FC = () => {
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [signupData, setSignupData] = useState({ email: '', password: '', nome: '' });
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { signIn, signUp } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -25,6 +27,14 @@ export const AuthForm: React.FC = () => {
     await signUp(signupData.email, signupData.password, signupData.nome);
     setLoading(false);
   };
+
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+        <ForgotPasswordForm onBackToLogin={() => setShowForgotPassword(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
@@ -67,6 +77,16 @@ export const AuthForm: React.FC = () => {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? 'Entrando...' : 'Entrar'}
                 </Button>
+                <div className="text-center">
+                  <Button 
+                    type="button"
+                    variant="link" 
+                    className="text-sm"
+                    onClick={() => setShowForgotPassword(true)}
+                  >
+                    Esqueceu sua senha?
+                  </Button>
+                </div>
               </form>
             </TabsContent>
             

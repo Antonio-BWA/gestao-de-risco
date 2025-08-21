@@ -33,7 +33,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   };
 
   const hasActiveFilters = filters.searchTerm || 
-    filters.dateRange || 
+    (filters.dateRange && filters.dateRange !== 'todos') || 
     filters.minFaturamento || 
     filters.maxFaturamento ||
     filters.sortBy !== 'nome';
@@ -89,7 +89,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                   <SelectValue placeholder="Todos os períodos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os períodos</SelectItem>
+                  <SelectItem value="todos">Todos os períodos</SelectItem>
                   <SelectItem value="2024">2024</SelectItem>
                   <SelectItem value="2023">2023</SelectItem>
                   <SelectItem value="ultimo-trimestre">Último trimestre</SelectItem>

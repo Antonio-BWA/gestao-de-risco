@@ -19,7 +19,7 @@ interface CompanyListProps {
 export const CompanyList: React.FC<CompanyListProps> = ({ companies, onViewDetails }) => {
   const [filters, setFilters] = useState<FilterState>({
     searchTerm: '',
-    dateRange: '',
+    dateRange: 'todos',
     minFaturamento: '',
     maxFaturamento: '',
     sortBy: 'nome',
@@ -39,7 +39,7 @@ export const CompanyList: React.FC<CompanyListProps> = ({ companies, onViewDetai
   const clearFilters = () => {
     setFilters({
       searchTerm: '',
-      dateRange: '',
+      dateRange: 'todos',
       minFaturamento: '',
       maxFaturamento: '',
       sortBy: 'nome',
@@ -61,7 +61,7 @@ export const CompanyList: React.FC<CompanyListProps> = ({ companies, onViewDetai
     }
 
     // Filtro de período
-    if (filters.dateRange) {
+    if (filters.dateRange && filters.dateRange !== 'todos') {
       const currentYear = new Date().getFullYear();
       const currentMonth = new Date().getMonth();
       

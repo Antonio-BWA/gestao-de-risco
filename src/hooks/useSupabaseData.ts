@@ -77,14 +77,17 @@ export const useSupabaseData = () => {
         // Salvar dados fiscais
         const fiscalData = (companyData as any).data;
         for (const [mesAno, dados] of Object.entries(fiscalData)) {
-          await supabase
-            .from('fiscal_data')
-            .upsert({
-              company_id: companyId,
-              mes_ano: mesAno,
-              compras: (dados as any).Compras,
-              faturamento: (dados as any).Faturamento
-            });
+          // Verificar se dados não é MaxDepthReached
+          if (dados && typeof dados === 'object' && !(dados as any)._type) {
+            await supabase
+              .from('fiscal_data')
+              .upsert({
+                company_id: companyId,
+                mes_ano: mesAno,
+                compras: (dados as any).Compras || 0,
+                faturamento: (dados as any).Faturamento || 0
+              });
+          }
         }
       }
 

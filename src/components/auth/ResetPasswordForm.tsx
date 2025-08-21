@@ -109,8 +109,8 @@ export const ResetPasswordForm: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+            <div className="mx-auto w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-4">
+              <CheckCircle className="w-6 h-6 text-accent-foreground" />
             </div>
             <CardTitle className="text-xl font-bold">Senha Redefinida!</CardTitle>
             <CardDescription>
@@ -126,8 +126,8 @@ export const ResetPasswordForm: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-            <Lock className="w-6 h-6 text-blue-600" />
+          <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+            <Lock className="w-6 h-6 text-primary" />
           </div>
           <CardTitle className="text-xl font-bold">Redefinir Senha</CardTitle>
           <CardDescription>

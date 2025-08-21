@@ -61,8 +61,8 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackTo
     return (
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-            <CheckCircle className="w-6 h-6 text-green-600" />
+          <div className="mx-auto w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-4">
+            <CheckCircle className="w-6 h-6 text-accent-foreground" />
           </div>
           <CardTitle className="text-xl font-bold">Email Enviado!</CardTitle>
           <CardDescription>
@@ -90,8 +90,8 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackTo
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-          <Mail className="w-6 h-6 text-blue-600" />
+        <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+          <Mail className="w-6 h-6 text-primary" />
         </div>
         <CardTitle className="text-xl font-bold">Esqueceu sua senha?</CardTitle>
         <CardDescription>
